@@ -1,0 +1,3 @@
+@echo off
+echo Starting Turbo Overdrive 2.5D...
+start "" "index.html"

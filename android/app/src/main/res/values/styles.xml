@@ -1,0 +1,11 @@
+<resources>
+    <style name="Theme.TurboOverdrive" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:statusBarColor">#0a0d18</item>
+        <item name="android:navigationBarColor">#0a0d18</item>
+    </style>
+
+    <style name="Theme.TurboOverdrive.Fullscreen" parent="Theme.TurboOverdrive">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+</resources>

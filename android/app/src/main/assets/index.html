@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#00f3ff">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <title>Turbo Overdrive 3D - Multiplier Racer</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@600;700&display=swap"
+    rel="stylesheet">
+</head>
+
+<body>
+  <div id="game-container">
+    <!-- Top HUD Bar -->
+    <div id="hud" class="hidden">
+      <div class="hud-box">
+        <span class="hud-label">SCORE</span>
+        <span id="score-display" class="hud-value">0</span>
+      </div>
+
+      <!-- Race Position -->
+      <div class="hud-box position-box" id="position-box">
+        <span class="hud-label">POS</span>
+        <span id="pos-display" class="hud-value pos-highlight">8<small id="pos-total">/10</small></span>
+      </div>
+
+      <!-- Multiplying Points Showcase -->
+      <div class="hud-box multiplier-box" id="multiplier-container">
+        <span class="hud-label">MULTIPLIER</span>
+        <div class="multiplier-wrapper">
+          <span id="multiplier-display" class="hud-value glow-text">x1.0</span>
+          <div class="combo-bar-bg">
+            <div id="combo-bar-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hud-box">
+        <span class="hud-label">SPEED</span>
+        <span id="speed-display" class="hud-value">0 <small>km/h</small></span>
+      </div>
+
+      <div class="hud-box">
+        <span class="hud-label">NITRO</span>
+        <div class="nitro-bar-bg">
+          <div id="nitro-bar-fill"></div>
+        </div>
+      </div>
+
+      <div class="hud-buttons">
+        <button id="cam-btn" class="hud-icon-btn" title="Change Camera Angle (C / Tap)">🎥</button>
+        <button id="mute-btn" class="hud-icon-btn" title="Toggle Sound">🔊</button>
+        <button id="pause-btn" class="hud-icon-btn" title="Pause Game">⏸</button>
+      </div>
+    </div>
+
+    <!-- Race Track Progress Bar & Lap Distance -->
+    <div id="race-progress-bar" class="race-progress-bar hidden">
+      <div class="level-indicator" id="hud-level-label">LVL 1/25</div>
+      <div class="track-progress-container">
+        <div class="track-progress-fill" id="race-progress-fill"></div>
+        <div class="track-car-dot" id="race-car-dot">🏎️</div>
+        <div class="track-finish-flag">🏁</div>
+      </div>
+      <div class="track-dist-label" id="race-dist-display">1200m</div>
+    </div>
+
+    <!-- Slipstream / Drafting Notification -->
+    <div id="slipstream-banner" class="slipstream-banner hidden">
+      ⚡ SLIPSTREAM DRAFTING! +25 KM/H ⚡
+    </div>
+
+    <!-- Active Multiplier Notification Banner -->
+    <div id="banner-container"></div>
+
+    <!-- 3-2-1-GO Racing Countdown Overlay -->
+    <div id="countdown-overlay" class="countdown-overlay hidden" style="display: none;">
+      <div id="countdown-text" class="countdown-number"></div>
+    </div>
+
+    <!-- Canvas Game Viewport -->
+    <canvas id="game-canvas" width="480" height="720"></canvas>
+
+    <!-- Start / Menu Overlay -->
+    <div id="start-overlay" class="overlay active">
+      <div class="overlay-card">
+        <div class="app-logo-wrapper">
+          <img src="logo.png" alt="Turbo Overdrive Logo" class="app-logo-img">
+        </div>
+        <div class="logo-badge">2.5D PERSPECTIVE RACER</div>
+        <h1 class="game-title">TURBO<span class="highlight">OVERDRIVE</span></h1>
+        <p class="tagline">DODGE TRAFFIC • PULL NEAR-MISSES • MULTIPLY YOUR POINTS!</p>
+
+        <div class="multiplier-explainer">
+          <div class="tip-card">
+            <span class="icon">⚡</span>
+            <div>
+              <strong>Near Misses</strong>
+              <p>Graze enemy cars at high speed to build up your <b>Combo Multiplier (up to x10)</b>!</p>
+            </div>
+          </div>
+          <div class="tip-card">
+            <span class="icon">💎</span>
+            <div>
+              <strong>Bonus Pickups</strong>
+              <p>Grab <b>x2, x3, x5 Orbs</b> & <b>Nitro Boosters</b> to rack up astronomical scores!</p>
+            </div>
+          </div>
+          <div class="tip-card">
+            <span class="icon">🚀</span>
+            <div>
+              <strong>Speed Demon</strong>
+              <p>Driving over 160 km/h grants an additional <b>1.5x Speed Score Bonus</b>!</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="controls-hint">
+          <span><b>STEER</b> : ◀ ▶ Buttons or Touch Screen Sides</span>
+          <span><b>BRAKE</b> : 🛑 BRAKE / S / ↓</span>
+          <span><b>NITRO</b> : ⚡ NITRO / SPACE</span>
+          <span><b>AUTO-ACCEL</b> : Full throttle by default ⚡</span>
+        </div>
+
+        <!-- Car Name Customization -->
+        <div class="car-customization-box">
+          <label for="player-car-name" class="car-name-label">🏎️ YOUR CAR NAME</label>
+          <div class="car-name-input-wrap">
+            <input type="text" id="player-car-name" class="car-name-input" maxlength="14" placeholder="ENTER CAR NAME" value="TURBO PHANTOM" autocomplete="off" spellcheck="false">
+          </div>
+        </div>
+
+        <div class="level-select-preview">
+          <div class="current-level-pill">
+            <span class="level-title-label">STAGE <span id="menu-current-level">1</span> / 25</span>
+            <span class="level-name" id="menu-level-name">Neon Highway Sprint</span>
+          </div>
+          <button id="level-select-btn" class="level-select-open-btn" title="Select Level">🏁 LEVELS (1 - 25)</button>
+        </div>
+
+        <div class="high-score-preview">
+          <span>HIGH SCORE: <b id="menu-high-score">0</b></span>
+        </div>
+
+        <button id="start-btn" class="glow-btn">START RACE</button>
+      </div>
+    </div>
+
+    <!-- Pause Overlay -->
+    <div id="pause-overlay" class="overlay hidden">
+      <div class="overlay-card">
+        <h2>GAME PAUSED</h2>
+        <p>Catch your breath, racer!</p>
+        <button id="resume-btn" class="glow-btn">RESUME</button>
+        <button id="pause-level-select-btn" class="secondary-btn">SELECT STAGE</button>
+      </div>
+    </div>
+
+    <!-- Race Finished / Level Complete Overlay -->
+    <div id="levelcomplete-overlay" class="overlay hidden">
+      <div class="overlay-card">
+        <div id="finish-badge" class="finish-badge">🏆 1ST PLACE WINNER!</div>
+        <h2 id="level-complete-title" class="gameover-title">LEVEL 1 CLEARED!</h2>
+        <p class="tagline" id="level-complete-sub">YOU QUALIFIED FOR THE NEXT STAGE!</p>
+        <div style="font-family:'Orbitron',monospace;font-size:0.85rem;color:var(--accent-cyan);margin-bottom:8px;letter-spacing:1px;">
+          PILOT MACHINE: <b id="finish-car-name" style="color:#fff;">TURBO PHANTOM</b>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-label">FINISH POS</span>
+            <span id="finish-pos" class="stat-val highlight">1st / 6</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">RACE TIME</span>
+            <span id="finish-time" class="stat-val">00:42.5</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">STAGE SCORE</span>
+            <span id="finish-score" class="stat-val highlight">12,450</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">OVERTAKES</span>
+            <span id="finish-overtakes" class="stat-val">5</span>
+          </div>
+        </div>
+
+        <div id="champion-badge" class="champion-badge hidden">
+          👑 GRAND CHAMPION RACER! ALL 25 LEVELS CONQUERED! 🏆
+        </div>
+
+        <div class="btn-group">
+          <button id="next-level-btn" class="glow-btn">NEXT LEVEL ➔</button>
+          <button id="retry-race-btn" class="secondary-btn">RETRY RACE</button>
+          <button id="level-select-btn-2" class="secondary-btn">SELECT LEVEL</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Level Select (1 - 25) Overlay -->
+    <div id="levelselect-overlay" class="overlay hidden">
+      <div class="overlay-card level-select-card">
+        <h2 class="level-select-title">SELECT STAGE</h2>
+        <p class="tagline">25 HIGH-SPEED RACING LEVELS (FINISH TOP 3 TO UNLOCK)</p>
+        <div class="levels-grid" id="levels-grid">
+          <!-- Populated dynamically: 25 level tiles -->
+        </div>
+        <button id="close-levelselect-btn" class="secondary-btn" style="margin-top: 15px;">BACK TO MENU</button>
+      </div>
+    </div>
+
+    <!-- Game Over Overlay -->
+    <div id="gameover-overlay" class="overlay hidden">
+      <div class="overlay-card">
+        <div class="crashed-badge">💥 CRASHED!</div>
+        <h2 class="gameover-title">RACE FINISHED</h2>
+
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-label">FINAL SCORE</span>
+            <span id="final-score" class="stat-val highlight">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">MAX MULTIPLIER</span>
+            <span id="final-max-mult" class="stat-val">x1.0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">NEAR MISSES</span>
+            <span id="final-near-misses" class="stat-val">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">TOP SPEED</span>
+            <span id="final-top-speed" class="stat-val">0 km/h</span>
+          </div>
+        </div>
+
+        <div id="new-high-badge" class="new-high-badge hidden">🏆 NEW ALL-TIME HIGH SCORE! 🏆</div>
+
+        <div class="btn-group">
+          <button id="restart-btn" class="glow-btn">HIT RETRY</button>
+          <button id="menu-btn" class="secondary-btn">MAIN MENU</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Touch Controls -->
+    <div id="touch-controls" class="touch-controls">
+      <div class="touch-cluster-left">
+        <button class="touch-btn" id="touch-left" title="Steer Left">◀</button>
+        <button class="touch-btn" id="touch-right" title="Steer Right">▶</button>
+      </div>
+      <div class="touch-cluster-right">
+        <button class="touch-btn touch-nitro" id="touch-nitro">⚡ NITRO</button>
+        <button class="touch-btn touch-brake" id="touch-brake">🛑 BRAKE</button>
+      </div>
+    </div>
+
+    <!-- Mini-Map (Bottom-Left Corner) -->
+    <div id="minimap-wrapper" class="minimap-wrapper hidden">
+      <canvas id="minimap-canvas" width="110" height="140"></canvas>
+      <div class="minimap-label">MAP</div>
+    </div>
+  </div>
+
+  <script src="three.min.js"></script>
+  <script src="audio.js"></script>
+  <script src="game.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => {
+          console.log('SW registration note: ', err);
+        });
+      });
+    }
+  </script>
+</body>
