@@ -214,6 +214,28 @@ class SoundSystem {
     osc.stop(now + 0.18);
   }
 
+  // Wall-Ride magnetic discharge hum
+  playWallRide() {
+    if (this.muted || !this.ctx) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    const filter = this.ctx.createBiquadFilter();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(340 + Math.random() * 80, now);
+    osc.frequency.exponentialRampToValueAtTime(760, now + 0.12);
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(620, now);
+    filter.Q.setValueAtTime(4.0, now);
+    gain.gain.setValueAtTime(0.08, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.15);
+  }
+
   // Crash explosion sound
   playCrash() {
     if (this.muted || !this.ctx) return;

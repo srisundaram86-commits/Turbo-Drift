@@ -629,6 +629,15 @@ html, body {
   font-size: 1.05rem;
 }
 
+.banner-wallride {
+  background: rgba(0, 255, 136, 0.28);
+  border: 1px solid #00ff88;
+  color: #00ff88;
+  text-shadow: 0 0 16px rgba(0, 255, 136, 0.95);
+  font-size: 1.15rem;
+  letter-spacing: 2px;
+}
+
 @keyframes bannerPop {
   0% { transform: translateY(15px) scale(0.7); opacity: 0; }
   20% { transform: translateY(0px) scale(1.1); opacity: 1; }
